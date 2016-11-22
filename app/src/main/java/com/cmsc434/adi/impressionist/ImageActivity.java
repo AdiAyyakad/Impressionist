@@ -8,7 +8,7 @@ import android.widget.ImageView;
 public class ImageActivity extends AppCompatActivity {
 
     ImpressionistView impressionistView;
-    ImageView imageView;
+    ImpressionistImageView imageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,10 +18,9 @@ public class ImageActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        imageView = (ImageView) findViewById(R.id.imageView);
+        imageView = (ImpressionistImageView) findViewById(R.id.imageView);
         impressionistView = (ImpressionistView) findViewById(R.id.impressionistView);
-        impressionistView.sourceView = imageView;
-        impressionistView.sourceBitmap = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
+        impressionistView.setImageView(imageView);
 
         super.onResume();
     }

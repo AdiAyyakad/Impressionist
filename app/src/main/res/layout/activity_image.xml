@@ -10,11 +10,11 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.cmsc434.adi.impressionist.ImageActivity">
 
-    <ImageView
+    <com.cmsc434.adi.impressionist.ImpressionistImageView
         android:layout_height="wrap_content"
         android:layout_width="0dp"
         android:layout_weight="0.96"
-        app:srcCompat="@mipmap/image02"
+        android:src="@mipmap/image02"
         android:id="@+id/imageView"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
