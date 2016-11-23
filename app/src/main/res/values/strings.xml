@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">ImpressionistPainter434</string>
+    <string name="save">Save</string>
+    <string name="brush">Brush</string>
+    <string name="clear">Clear</string>
+    <string name="load">Load Image</string>
+    <string name="get_images">Get Images</string>
+    <string name="motion">Motion Brush Size</string>
 </resources>

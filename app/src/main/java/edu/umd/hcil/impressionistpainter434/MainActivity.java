@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements OnMenuItemClickListener {
 
@@ -73,8 +74,11 @@ public class MainActivity extends AppCompatActivity implements OnMenuItemClickLi
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        Toast.makeText(MainActivity.this, "Painting cleared", Toast.LENGTH_SHORT).show();
                         _impressionistView.clearPainting();
+                        Toast.makeText(MainActivity.this,
+                                "Painting cleared",
+                                Toast.LENGTH_SHORT)
+                                .show();
                     }
                 })
                 .setNegativeButton(android.R.string.no, null).show();
@@ -85,6 +89,29 @@ public class MainActivity extends AppCompatActivity implements OnMenuItemClickLi
         popupMenu.setOnMenuItemClickListener(this);
         popupMenu.inflate(R.menu.popup_menu);
         popupMenu.show();
+    }
+
+    public void onButtonClickSave(View v) {
+        new AlertDialog.Builder(this)
+                .setTitle("Save Painting")
+                .setMessage("Are you ready to save your painting?")
+                .setIcon(android.R.drawable.ic_menu_save)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        Bitmap bmp = _impressionistView.savePainting();
+                        MediaStore.Images.Media.insertImage(
+                                getContentResolver(),
+                                bmp,
+                                UUID.randomUUID().toString(),
+                                "Generated with Impressionist App"
+                        );
+                        Toast.makeText(MainActivity.this,
+                                "Painting saved",
+                                Toast.LENGTH_SHORT)
+                                .show();
+                    }
+                })
+                .setNegativeButton(android.R.string.no, null).show();
     }
 
     public boolean onMenuItemClick(MenuItem item) {
@@ -100,14 +127,6 @@ public class MainActivity extends AppCompatActivity implements OnMenuItemClickLi
             case R.id.menuLine:
                 Toast.makeText(this, "Line Brush", Toast.LENGTH_SHORT).show();
                 _impressionistView.setBrushType(BrushType.Line);
-                return true;
-            case R.id.menuCircleSplatter:
-                Toast.makeText(this, "Circle Splatter Brush", Toast.LENGTH_SHORT).show();
-                _impressionistView.setBrushType(BrushType.CircleSplatter);
-                return true;
-            case R.id.menuLineSplatter:
-                Toast.makeText(this, "Line Splatter Brush", Toast.LENGTH_SHORT).show();
-                _impressionistView.setBrushType(BrushType.LineSplatter);
                 return true;
         }
         return false;

@@ -79,18 +79,11 @@ public class ImpressionistImageView extends ImageView {
     }
 
     public void addCircle(float x, float y, float size) {
-
-//        this.x = clamp(x, imageRect.left, imageRect.right);
-//        this.y = clamp(y, imageRect.top, imageRect.bottom);
         this.x = x;
         this.y = y;
         this.size = size;
 
         invalidate();
-    }
-
-    private float clamp(float val, float min, float max) {
-        return (val > max) ? max : (val < min) ? min : val;
     }
 
 }

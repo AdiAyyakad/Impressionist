@@ -16,7 +16,6 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.widget.ImageView;
-
 import java.text.MessageFormat;
 
 /**
@@ -33,7 +32,7 @@ public class ImpressionistView extends View {
     private Rect imageViewRect;
     private Bitmap imageViewBitmap;
     private int alpha = 150;
-    private boolean useMotionSpeedForBrushStrokeSize = true;
+    private boolean useMotionSpeedForBrushStrokeSize = false;
     private VelocityTracker velocityTracker = VelocityTracker.obtain();
     private Paint paintBorder = new Paint();
     private BrushType brushType = BrushType.Square;
@@ -146,11 +145,11 @@ public class ImpressionistView extends View {
         float curTouchX = motionEvent.getX();
         float curTouchY = motionEvent.getY();
 
-        if (!validCoordinates(Math.round(curTouchX), Math.round(curTouchY))) {
+        if (!validCoordinates(curTouchX, curTouchY)) {
             return true;
         }
 
-        int touchedRGB = getPixelColor(Math.round(curTouchX), Math.round(curTouchY));
+        int touchedRGB = getPixelColor(curTouchX, curTouchY);
         paint.setColor(touchedRGB);
 
         switch(motionEvent.getAction()) {
@@ -168,20 +167,20 @@ public class ImpressionistView extends View {
                     float touchX = motionEvent.getHistoricalX(i);
                     float touchY = motionEvent.getHistoricalY(i);
 
-                    if (!validCoordinates(Math.round(touchX), Math.round(touchY))) {
+                    if (!validCoordinates(touchX, touchY)) {
                         return true;
                     }
 
-                    paint.setColor(getPixelColor(Math.round(touchX), Math.round(touchY)));
+                    paint.setColor(getPixelColor(touchX, touchY));
                     drawShape(touchX, touchY, velocityBrushSize);
                     imageView.addCircle(touchX, touchY, (useMotionSpeedForBrushStrokeSize) ? velocityBrushSize : DEFAULT_BRUSH_SIZE);
                 }
 
-                if (!validCoordinates(Math.round(motionEvent.getX()), Math.round(motionEvent.getY()))) {
+                if (!validCoordinates(motionEvent.getX(), motionEvent.getY())) {
                     return true;
                 }
 
-                paint.setColor(getPixelColor(Math.round(motionEvent.getX()), Math.round(motionEvent.getY())));
+                paint.setColor(getPixelColor(motionEvent.getX(), motionEvent.getY()));
                 drawShape(motionEvent.getX(), motionEvent.getY(), velocityBrushSize);
                 invalidate();
                 break;
@@ -198,9 +197,17 @@ public class ImpressionistView extends View {
         return (zVelocity > MAX_SPEED) ? MAX_SPEED : zVelocity;
     }
 
+    private boolean validCoordinates(float x, float y) {
+        return validCoordinates((int) x, (int) y);
+    }
+
     private boolean validCoordinates(int x, int y) {
-        return (imageViewRect == null || x < 0 || y < 0) ? false :
+        return (imageViewRect == null) ? false :
             x > imageViewRect.left && x < imageViewRect.right && y > imageViewRect.top && y < imageViewRect.bottom;
+    }
+
+    private int getPixelColor(float x, float y) {
+        return getPixelColor((int) x, (int) y);
     }
 
     private int getPixelColor(int x, int y) {
@@ -208,20 +215,19 @@ public class ImpressionistView extends View {
     }
 
     private void drawShape(float x, float y, float speedBrushSize) {
+        float brushSize = (useMotionSpeedForBrushStrokeSize) ? speedBrushSize : DEFAULT_BRUSH_SIZE;
         switch (brushType) {
             case Circle:
-                if (useMotionSpeedForBrushStrokeSize) {
-                    offScreenCanvas.drawCircle(x, y, speedBrushSize, paint);
-                } else {
-                    offScreenCanvas.drawCircle(x, y, DEFAULT_BRUSH_SIZE, paint);
-                }
+                offScreenCanvas.drawCircle(x, y, brushSize, paint);
                 break;
             case Square:
-                if (useMotionSpeedForBrushStrokeSize) {
-                    offScreenCanvas.drawRect(x - speedBrushSize, y - speedBrushSize, x + speedBrushSize, y + speedBrushSize, paint);
-                } else {
-                    offScreenCanvas.drawRect(x - DEFAULT_BRUSH_SIZE, y - DEFAULT_BRUSH_SIZE, x + DEFAULT_BRUSH_SIZE, y + DEFAULT_BRUSH_SIZE, paint);
-                }
+                offScreenCanvas.drawRect(x - brushSize, y - brushSize, x + brushSize, y + brushSize, paint);
+                break;
+            case Line:
+                float temp = paint.getStrokeWidth();
+                paint.setStrokeWidth(brushSize/4);
+                offScreenCanvas.drawLine(x - brushSize, y - brushSize, x + brushSize, y + brushSize, paint);
+                paint.setStrokeWidth(temp);
                 break;
             default:
                 break;
@@ -234,15 +240,19 @@ public class ImpressionistView extends View {
     }
 
     public void updateImageViewInfo() {
-        imageViewRect = getBitmapPositionInsideImageView(imageView);
         BitmapDrawable imgDrawable = ((BitmapDrawable) imageView.getDrawable());
         if (imgDrawable != null) {
             imageViewBitmap = imgDrawable.getBitmap();
+            imageViewRect = getBitmapPositionInsideImageView(imageView);
         }
     }
 
     public void speedOfMotionCheckBox(Boolean checked) {
         useMotionSpeedForBrushStrokeSize = checked;
+    }
+
+    public Bitmap savePainting() {
+        return offScreenBitmap;
     }
 
     /**
